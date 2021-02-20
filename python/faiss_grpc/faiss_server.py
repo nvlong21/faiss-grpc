@@ -58,24 +58,20 @@ class ServerConfig:
 class FaissServiceConfig:
     nprobe: Optional[int] = None
     normalize_query: bool = False
-    vector_dim: int = 512
-    ssdb_port: Optional[int] = 8899
 
 
 env = Env()
 env.read_env()
 
-base_dir = os.path.dirname(os.path.realpath(__file__))
 SSDB_HOST = env.str('SSDB_HOST', '[::]')
-STORAGE = env.str('STORAGE', os.path.join(base_dir, 'src/db'))
-YAML_CONFIG = env.str('YAML_CONFIG', os.path.join(base_dir, 'src/config/search_config.yaml'))
 
 class FaissServiceServicer(FaissServiceServicer):
-    storages = STORAGE
+    
     collection_default = "test"
-    def __init__(self, config: FaissServiceConfig) -> None:
+    def __init__(self, config: FaissServiceConfig, yaml_config:str, storage:str) -> None:
         self.config = config
-        
+        self.yaml_config = yaml_config
+        self.storages = storages
         if self.config.nprobe:
             self.index.nprobe = self.config.nprobe
 
@@ -422,6 +418,8 @@ class Server:
         # index_path: str,
         server_config: ServerConfig,
         service_config: FaissServiceConfig,
+        yaml_config:str, 
+        storage:str
     ) -> None:
         
         # index = faiss.read_index(index_path)
@@ -429,7 +427,7 @@ class Server:
             futures.ThreadPoolExecutor(max_workers=server_config.max_workers)
         )
         add_FaissServiceServicer_to_server(
-            FaissServiceServicer(service_config), self.server
+            FaissServiceServicer(service_config, yaml_config, storage), self.server
         )
         self.server.add_insecure_port(
             f'{server_config.host}:{server_config.port}'

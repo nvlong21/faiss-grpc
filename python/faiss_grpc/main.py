@@ -6,7 +6,7 @@ env = Env()
 env.read_env()
 
 
-def main() -> None:
+def main(yaml_config:str, storage:str) -> None:
     server_config = ServerConfig(
         host=env.str('FAISS_GRPC_HOST', '[::]'),
         port=env.int("FAISS_GRPC_PORT", 50051),
@@ -17,7 +17,7 @@ def main() -> None:
         normalize_query=env.bool("FAISS_GRPC_NORMALIZE_QUERY", False),
     )
 
-    server = Server(server_config, service_config)
+    server = Server(server_config, service_config, yaml_config, storage)
     server.serve()
 
 if __name__ == "__main__":
