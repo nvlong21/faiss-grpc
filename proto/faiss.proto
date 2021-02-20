@@ -1,0 +1,113 @@
+// Messages for Faiss searching services.
+syntax = "proto3";
+
+package faiss;
+
+import "google/protobuf/empty.proto";
+
+message Entity{
+    string name = 1;
+    string val = 2;
+}
+
+message Entities{
+    repeated Entity entities = 1;
+}
+
+// Single instance of Faiss searching results.
+message Neighbor {
+    // ID of neighbor's id.
+    uint64 id = 1;
+    // Score of metric. This value depends on which metrics (typically L2 distance, Inner Product and so on) you used to build index.
+    float score = 2;
+    repeated Entity entities = 3;
+}
+
+message MultipleNeighbor{
+    repeated Neighbor neighbors = 1;
+}
+
+// Wrapper message for list of float32. This keeps compatible for vectors used on Faiss.
+message Vector {
+    // The query vector for searching. Dimension must be same as subscribed vectors in index.
+    repeated float val = 1;
+}
+
+// Request for searching by query vector.
+message SearchRequest {
+    string collection = 1;
+    // The query vector for searching. Dimension must be same as subscribed vectors in index.
+    repeated Vector queries = 2;
+    // How many results (neighbors) you want to get.
+    uint64 k = 3;
+}
+
+// Response of searching by query vector.
+message SearchResponse {
+    // Neighbors of given query.
+    repeated MultipleNeighbor multi_neighbors = 1;
+}
+
+// Request for searching by ID.
+message SearchByIdRequest {
+    // The ID for searching.
+    uint64 id = 1;
+    // How many results (neighbors) you want to get.
+    uint64 k = 2;
+}
+
+// Response of searching by ID.
+message SearchByIdResponse {
+    // The requested ID.
+    uint64 request_id = 1;
+    // Neighbors of given ID. Requested ID is excluded.
+    repeated Neighbor neighbors = 2;
+}
+
+// Response of heatbeat.
+message SimpleResponse {
+    // Return OK if server is working.
+    string message = 1;
+}
+
+message InsertRequest {
+    string collection = 1;
+    repeated Vector vectors = 2;
+    repeated float ids = 3;
+    repeated Entities multi_entities = 4;
+};
+
+message InsertResponse {
+    string message = 1;
+    repeated uint64 id = 2;
+};
+
+message RemoveRequest {
+    string collection = 1;
+    repeated uint64 ids = 2;
+}
+
+message RemoveResponse {
+    string message = 1;
+    repeated uint64 ids = 2;
+};
+
+message CreateRequest{
+    string collection_name = 1;
+    uint64 dim = 2;
+}
+
+service FaissService {
+    // Check server is working.
+    rpc Heatbeat (google.protobuf.Empty) returns (SimpleResponse);
+    // Search neighbors from query vector.
+    rpc Search(SearchRequest) returns (SearchResponse);
+    // Search neighbors from ID.
+    rpc SearchById(SearchByIdRequest) returns (SearchByIdResponse);
+    
+    rpc Insert(InsertRequest) returns (InsertResponse);
+
+    rpc Remove(RemoveRequest) returns (RemoveResponse);
+
+    rpc CreateCollection(CreateRequest) returns (SimpleResponse);
+}

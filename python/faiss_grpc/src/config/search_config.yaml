@@ -1,0 +1,24 @@
+Faiss:
+  # Distributed:
+  #   Enable: False
+  #   Machine: '12010,12011,12012'
+  Gpu:
+    Enable: False
+    TempMemory: -1 # if -1, use system default
+    Device: "0"
+  Index:
+    Field: 'embedding' 
+    MetricType: 'L2'
+    IndexType: 'IVF_SQ8_HYBRID'
+    Nlist: 16384
+
+  Query:
+    Topk: 1
+    NProbe: 16
+    Vector:
+      MetricType: 'L2'
+
+  MetaData:
+    Enable: False 
+    Port: 8888
+    Files: 'id|name'
