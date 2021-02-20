@@ -94,7 +94,7 @@ class FaissServiceServicer(FaissServiceServicer):
             self.load_collection(self.collection_default)
         
     def __config__(self):
-        self.cfg = yaml_config.load(YAML_CONFIG)
+        self.cfg = yaml_config.load(self.yaml_config)
         self.gpu = False
         if self.cfg.getProperty("Faiss.Gpu.Enable"):
             self.gpu = True
