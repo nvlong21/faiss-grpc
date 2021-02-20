@@ -71,7 +71,7 @@ class FaissServiceServicer(FaissServiceServicer):
     def __init__(self, config: FaissServiceConfig, yaml_config:str, storage:str) -> None:
         self.config = config
         self.yaml_config = yaml_config
-        self.storages = storages
+        self.storages = storage
         if self.config.nprobe:
             self.index.nprobe = self.config.nprobe
 
