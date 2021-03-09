@@ -173,6 +173,7 @@ class FaissServiceServicer(FaissServiceServicer):
 
 
     def Insert(self, request, context) -> InsertResponse:
+        
         collection_name = request.collection
         count = 0
         max_batch = 10000
@@ -180,20 +181,14 @@ class FaissServiceServicer(FaissServiceServicer):
         for vt in request.vectors:
             vec = np.array(vt.val, dtype=np.float32)
             embeddings.append(vec)
-            # if query.shape[1] != self.index.d:
-            #     context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            #     msg = (
-            #         'query vector dimension mismatch '
-            #         f'expected {self.index.d} but passed {query.shape[1]}'
-            #     )
-            #     context.set_details(msg)
-            #     return SearchResponse()
         embeddings = np.atleast_2d(embeddings)
         ids = request.ids
+
         multi_entities = request.multi_entities
-        if collection_name is None:
+
+        if collection_name is None or len(collection_name) == 0:
             collection_name = self.collection_default
-        
+
         if len(embeddings):
             embeddings = sanitize(np.asarray(embeddings, dtype=np.float32))
             ids = np.asarray(ids, dtype=np.int)
@@ -201,7 +196,6 @@ class FaissServiceServicer(FaissServiceServicer):
         # if self.cfg.getProperty("Faiss.MetaData.Enable"):
         #     fields = [field.strip() for field in self.cfg.getProperty("Faiss.MetaData.Files").split('|')]
         while count < embeddings.shape[0]:
-            
             batch_embedding = embeddings[count:max_batch]
             batch_id = ids[count:max_batch]
             batch_entities = multi_entities[count:max_batch]
@@ -227,9 +221,9 @@ class FaissServiceServicer(FaissServiceServicer):
                     passed_ids.append(id)
                 except Exception as e:
                     print(e)
-
                 time.sleep(0.2)
             count+=max_batch
+
         return InsertResponse(message="ok", id = passed_ids)
 
     def Remove(self, request, context) -> RemoveResponse:
